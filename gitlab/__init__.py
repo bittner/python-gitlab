@@ -27,9 +27,11 @@ import gitlab.config
 from gitlab.const import *  # noqa
 from gitlab.exceptions import *  # noqa
 from gitlab import utils  # noqa
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 
 __title__ = "python-gitlab"
-__version__ = "2.5.0"
+__version__ = "2.6.0"
 __author__ = "Gauvain Pocentek"
 __email__ = "gauvainpocentek@gmail.com"
 __license__ = "LGPL3"
@@ -496,9 +498,12 @@ class Gitlab(object):
 
         # We need to deal with json vs. data when uploading files
         if files:
-            data = post_data
+            my_data = post_data
             json = None
-            del opts["headers"]["Content-type"]
+            my_data["file"] = files["file"]
+            files = None
+            data = MultipartEncoder(my_data)
+            opts["headers"]["Content-type"] = data.content_type
         else:
             json = post_data
             data = None
